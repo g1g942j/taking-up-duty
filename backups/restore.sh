@@ -5,9 +5,9 @@ set -eo pipefail
 
 TIMESTAMP=$(TZ=Asia/Krasnoyarsk date +"%Y-%m-%d_%H-%M-%S")
 DB_HOST="localhost"
-DB_USER="postgres"
-DB_NAME="project"
-BACKUP_PATH="/opt/ganthedgehog/GantHedgehog/backup/dumps"
+DB_USER="service_user"
+DB_NAME="notes"
+BACKUP_PATH="/opt/taking-up-duty/backups/dumps"
 
 
 
