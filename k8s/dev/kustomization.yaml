@@ -4,7 +4,6 @@ kind: Kustomization
 namespace: dev
 
 resources:
-  - ../base/namespace-dev.yaml
   - ../base/deployment.yaml
   - ../base/service.yaml
   - configmap.yaml
