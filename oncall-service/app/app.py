@@ -23,6 +23,7 @@ from logging.handlers import RotatingFileHandler
 import psycopg2
 import psycopg2.pool
 import redis
+import redis.cluster
 from flask import Flask, request, jsonify, Response
 
 # --------------------------------------------------------------------------- #
@@ -38,7 +39,7 @@ REDIS_TTL = int(os.getenv("REDIS_TTL", "30"))
 
 _raw_nodes = os.getenv("REDIS_NODES", "localhost:7001")
 REDIS_STARTUP_NODES = [
-    {"host": h, "port": int(p)}
+    redis.cluster.ClusterNode(h, int(p))
     for h, p in (node.split(":") for node in _raw_nodes.split(","))
 ]
 
