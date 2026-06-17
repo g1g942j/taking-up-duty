@@ -35,29 +35,33 @@ check() {
     echo "  FAIL  [$method] $label: expected HTTP $expected, got HTTP $actual  $body"
     FAIL=$((FAIL + 1))
   fi
+
+  echo "$body"
 }
 
 echo "=== Проверка $BASE ==="
 echo ""
 
 echo "--- Health ---"
-check "liveness"  GET "$BASE/healthz" 200
-check "readiness" GET "$BASE/readyz"  200
+check "liveness"  GET "$BASE/healthz" 200 > /dev/null
+check "readiness" GET "$BASE/readyz"  200 > /dev/null
 
 echo ""
 echo "--- CRUD ---"
-check "создать заметку 1"  POST   "$BASE/notes"   201 '{"title":"test note","body":"hello world"}'
-check "создать заметку 2"  POST   "$BASE/notes"   201 '{"title":"second note","body":"test body"}'
-check "список заметок"     GET    "$BASE/notes"   200
-check "получить заметку"   GET    "$BASE/notes/1" 200
-check "обновить заметку"   PUT    "$BASE/notes/1" 200 '{"title":"updated","body":"updated body"}'
-check "получить обновлённую" GET  "$BASE/notes/1" 200
-check "удалить заметку"    DELETE "$BASE/notes/1" 200
-check "получить удалённую (ожидаем 404)" GET "$BASE/notes/1" 404
+body=$(check "создать заметку 1" POST "$BASE/notes" 201 '{"title":"test note","body":"hello world"}')
+NOTE_ID=$(echo "$body" | grep -o '"id":[0-9]*' | grep -o '[0-9]*' | head -1)
+
+check "создать заметку 2"        POST   "$BASE/notes"          201 '{"title":"second note","body":"test body"}' > /dev/null
+check "список заметок"           GET    "$BASE/notes"          200 > /dev/null
+check "получить заметку"         GET    "$BASE/notes/$NOTE_ID" 200 > /dev/null
+check "обновить заметку"         PUT    "$BASE/notes/$NOTE_ID" 200 '{"title":"updated","body":"updated body"}' > /dev/null
+check "получить обновлённую"     GET    "$BASE/notes/$NOTE_ID" 200 > /dev/null
+check "удалить заметку"          DELETE "$BASE/notes/$NOTE_ID" 200 > /dev/null
+check "получить удалённую (404)" GET    "$BASE/notes/$NOTE_ID" 404 > /dev/null
 
 echo ""
 echo "--- Metrics ---"
-check "prometheus metrics" GET "$BASE/metrics" 200
+check "prometheus metrics" GET "$BASE/metrics" 200 > /dev/null
 
 echo ""
 echo "==============================="
