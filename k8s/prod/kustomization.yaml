@@ -4,8 +4,8 @@ kind: Kustomization
 namespace: prod
 
 resources:
-  - ../base/deployment.yaml
-  - ../base/service.yaml
+  - deployment.yaml
+  - service.yaml
   - configmap.yaml
   - secret.yaml
 

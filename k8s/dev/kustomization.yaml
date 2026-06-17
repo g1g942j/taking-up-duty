@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: dev
 
 resources:
-  - ../base/deployment.yaml
-  - ../base/service.yaml
+  - deployment.yaml
+  - service.yaml
   - configmap.yaml
   - secret.yaml
