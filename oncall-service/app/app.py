@@ -34,9 +34,13 @@ DB_NAME = os.getenv("DB_NAME", "notes")
 DB_USER = os.getenv("DB_USER", "notes")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "notes")
 
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
-REDIS_TTL = int(os.getenv("REDIS_TTL", "30"))  # секунды; TTL обязателен по заданию
+REDIS_TTL = int(os.getenv("REDIS_TTL", "30"))
+
+_raw_nodes = os.getenv("REDIS_NODES", "localhost:7001")
+REDIS_STARTUP_NODES = [
+    {"host": h, "port": int(p)}
+    for h, p in (node.split(":") for node in _raw_nodes.split(","))
+]
 
 APP_PORT = int(os.getenv("APP_PORT", "8080"))
 LOG_DIR = os.getenv("LOG_DIR", "/var/log/oncall-service")
@@ -113,9 +117,13 @@ def init_schema():
 
 def init_redis():
     global rds
-    rds = redis.Redis(host=REDIS_HOST, port=REDIS_PORT,
-                      socket_connect_timeout=1, socket_timeout=1,
-                      decode_responses=True)
+    rds = redis.cluster.RedisCluster(
+        startup_nodes=REDIS_STARTUP_NODES,
+        decode_responses=True,
+        socket_connect_timeout=1,
+        socket_timeout=1,
+        skip_full_coverage_check=True,
+    )
 
 
 app = Flask(__name__)
@@ -350,8 +358,8 @@ def bootstrap():
     init_db_pool()
     init_schema()
     init_redis()
-    logger.info("service bootstrapped: db=%s:%s redis=%s:%s",
-                DB_HOST, DB_PORT, REDIS_HOST, REDIS_PORT)
+    logger.info("service bootstrapped: db=%s:%s redis_nodes=%s",
+                DB_HOST, DB_PORT, _raw_nodes)
 
 
 if __name__ == "__main__":
