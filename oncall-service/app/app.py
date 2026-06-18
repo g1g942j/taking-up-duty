@@ -97,6 +97,7 @@ def init_db_pool():
         1, 10,
         host=DB_HOST, port=DB_PORT, dbname=DB_NAME,
         user=DB_USER, password=DB_PASSWORD,
+        connect_timeout=3,
     )
 
 
